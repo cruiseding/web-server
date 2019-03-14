@@ -1,0 +1,834 @@
+package com.net.aipeng.redirect.resolverC.interface1.mA;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutFace;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutManager;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface4.JsonUtil;
+import com.net.aipeng.classroot.interface4.JyHelpManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+import com.net.aipeng.redirect.resolverC.interface2.mA.aipengSqlUser_C_01182;
+import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
+public class aipengInoutUser_C_01182 extends aipengInOutManager implements
+aipengInOutFace {
+	protected ArrayList<Map<String, Object>> list;
+	protected ArrayList<Map<String, Object>> list1;
+	protected ArrayList<Map<String, Object>> list2;
+	protected ArrayList<Map<String, Object>> list3;
+	protected ArrayList<Map<String, Object>> list4;
+	protected ArrayList<Map<String, Object>> list5;
+	protected ArrayList<Map<String, Object>> list6;
+	protected ArrayList<Map<String, Object>> list7;
+	protected ArrayList<Map<String, Object>> listzong;
+	protected String json = "";
+	aipengSqlMFace sqlmface = new aipengSqlUser_C_01182();
+
+	public aipengInoutUser_C_01182(String[] arg, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException,
+			SQLException {
+		super(arg, request, response);
+	}
+
+	@Override
+	public void addface() throws SQLException, ServletException, IOException {
+		// TODO Auto-generated method stub
+		switch (arg[1]) {
+		case "renzheng_submit":
+			renzheng_submit(arg);
+			break;
+		
+		default:
+			break;
+		}
+	}
+	
+	
+	/**
+	 * 认证提交   ,,,,,,,,			
+	 * renzheng_submit
+	 * arg[2] user_id 
+	 * arg[3] photo
+	 * arg[4] nickname
+	 * arg[5] age
+	 * arg[6] city
+	 * arg[7] signature  ---个性签名
+	 * arg[8] photo_album --相册
+	 * arg[9] selfie     ---自拍照
+	 * arg[10] refusal   ---认证状态
+	 * 
+	 * @param arg
+	 * @throws ServletException 
+	 * @throws IOException 
+	 * @throws SQLException 
+	 */
+	private void renzheng_submit(String[] arg) throws ServletException, SQLException, IOException {
+		// TODO Auto-generated method stub
+		String sql = sqlmface.addSqlface(0, arg);
+		log.send(DataType.basicType, "01165", "女神认证--sql:", sql);
+		int success = sqlUtil.sql_exec(sql);
+		log.send(DataType.basicType, "01165", "女神认证--success:", success);
+		
+		String sql1 = sqlmface.addSqlface(1, arg);
+		log.send(DataType.basicType, "01165", "用户表修改女神认证状态--sql:", sql);
+		int success1 = sqlUtil.sql_exec(sql1);
+		log.send(DataType.basicType, "01165", "用户表修改女神认证状态--success:", success);
+		
+		if(success==1 && success1==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+		
+		
+	}
+	
+	@Override
+	public void modface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		case"pay_vip":
+			pay_vip(arg);
+			break;
+		case"sayhi":
+			sayhi(arg);
+			break;
+		//更改公开状态
+		case"change_status":
+			change_status(arg);
+			break;
+		//绑定手机号
+		case"binding_phone":
+			binding_phone(arg);
+			break;
+		//修改为微信或qq
+		case"chang_wechatOrqq":
+			chang_wechatOrqq(arg);
+			break;
+		case"tijiao_edit":
+			tijiao_edit(arg);
+			break;
+			//刷新热推时间
+		case"refresh_time":
+			refresh_time(arg);
+			break;
+		//个人资料修改
+		case"update_personal_data":
+			update_personal_data(arg);
+			break;
+		//移除黑名单
+		case"remove_black_list":
+		default:
+			break;
+		}
+
+	}
+
+
+
+
+	//arg[2]用户id，arg[3]充值会员类型	
+	private void pay_vip(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		 String sql="";
+		 String endDate="";
+		log.send(DataType.basicType, "01182", "pay_vip", sql);
+		if(("一个月会员".equals(arg[3]))){
+			 Calendar now = Calendar.getInstance();
+			 now.add(Calendar.DAY_OF_MONTH, 30);
+			 endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now.getTime());
+		}
+		else if(("一年会员").equals(arg[3])){
+			 Calendar now = Calendar.getInstance();
+			 now.add(Calendar.YEAR,1);
+			 endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now.getTime());
+		}
+		else if(("三个月会员").equals(arg[3])){
+			 Calendar now = Calendar.getInstance();  
+			 now.add(Calendar.MONTH, 3);  
+			 endDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now.getTime());
+		}
+		 	arg[3]=endDate;
+			log.send(DataType.basicType, "arg[3]", "arg[3]", arg[3]);
+			sql=sqlmface.modSqlface(0, arg);
+			int success =sqlUtil.sql_exec(sql);
+			if(success==1){
+				String jsonadd = "{\"success\":\"1\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}else{
+				String jsonadd = "{\"success\":\"0\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}
+	}
+	//arg[2]user_id,arg[3],target_id
+	private void sayhi(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		log.send(DataType.basicType, "arg[3]", "arg[3]", arg[3]);
+		int success=-1;
+		String sql="";
+		sql=sqlmface.modSqlface(0, arg);
+		log.send(DataType.basicType, "sql1", "sql1", sql);
+		int res=sqlUtil.get_int(sql);
+		log.send(DataType.basicType, "sayhi_res", "sayhi_res", res);
+		if(res>0){
+			sql=sqlmface.modSqlface(1, arg);
+			log.send(DataType.basicType, "sql2", "sql2", sql);
+			success=sqlUtil.sql_exec(sql);
+		}
+		else{
+			sql=sqlmface.modSqlface(2, arg);
+			log.send(DataType.basicType, "sql3", "sql3", sql);
+			success=sqlUtil.sql_exec(sql);
+		}
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+		
+	}
+	
+	//arg[2]user_id,arg[3]参数，arg[4]判断值 change_status
+	private void change_status(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql="";
+		int success=-1;
+		if("公开联系方式".equals(arg[4])){
+			sql=sqlmface.modSqlface(0, arg);
+			success=sqlUtil.sql_exec(sql);
+		}
+		else if("消息振动提醒".equals(arg[4])){
+			sql=sqlmface.modSqlface(1, arg);
+			success=sqlUtil.sql_exec(sql);
+		}
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+	}
+	//绑定手机号  arg[2]user_id, arg[3]手机号
+	private void binding_phone(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.modSqlface(0, arg);
+		int success=sqlUtil.sql_exec(sql);
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+	}
+	//arg[2],user_id, arg[3],参数 ，arg[4] 判断值（微信，qq)
+	private void chang_wechatOrqq(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql="";
+		int success=-1;
+		if("微信".equals(arg[4])){
+			sql=sqlmface.modSqlface(0, arg);
+			success=sqlUtil.sql_exec(sql);
+		}
+		else if("qq".equals(arg[4])){
+			sql=sqlmface.modSqlface(1, arg);
+			success=sqlUtil.sql_exec(sql);
+		}
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}	
+	}
+
+	private void refresh_time(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.modSqlface(0, arg);
+		int success=sqlUtil.sql_exec(sql);
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}	
+		
+	}
+	//提交编辑资料   arg[2]user_id
+	private void tijiao_edit(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.modSqlface(0, arg);
+		int success=sqlUtil.sql_exec(sql);
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+		
+	}
+	
+	//个人资料修改
+	private void update_personal_data(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		int success;
+		String sql=sqlmface.modSqlface(0, arg);
+		//1.查询表里是否有数据是否审核，(没有数据执行添加，全部已审核执行添加)
+		//2.有数据有未审核，或者待审核执行修改
+//		int res=sqlUtil.sql_exec(sql);
+		int res=sqlUtil.get_int(sql);
+		//是否有审核中的数据，有的话执行修改；没有，执行添加
+		if(res==1){//修改
+			sql=sqlmface.modSqlface(1, arg);
+			int resss=sqlUtil.get_int(sql);//查询未审核的id
+			arg=Arrays.copyOf(arg, arg.length+5); 
+			arg[10]=resss+"";
+			sql=sqlmface.modSqlface(2, arg);
+			success=sqlUtil.sql_exec(sql);
+			if(success==1){
+				String jsonadd = "{\"success\":\"1\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}else{
+				String jsonadd = "{\"success\":\"0\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}
+		}
+		else{//添加
+			sql=sqlmface.modSqlface(3, arg);
+			success=sqlUtil.sql_exec(sql);
+			if(success==1){
+				String jsonadd = "{\"success\":\"1\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}else{
+				String jsonadd = "{\"success\":\"0\"}";
+				inOutUtil.return_ajax(jsonadd);
+			}
+		}
+	
+	}
+	//arg[2]用户需求id
+	private void delete_need(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql = sqlmface.modSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "账号绑定---sql:", sql);
+		int success = sqlUtil.sql_exec(sql);
+		if(success==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+	}
+	@Override
+	public void deleteface() throws SQLException, ServletException, IOException {
+	switch (arg[1]) {
+		default:
+			break;
+		}
+	}
+
+
+	@Override
+	public void searchface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		//查询附近主播
+		case "seddd":
+		case"sefujin":
+			sefujin(arg);
+			break;
+		//查询快撩
+		case"kuailiao":
+			kuailiao(arg);
+			break;
+		//查询活跃主播,推荐主播,女神堂
+		case"seactive":
+			seactive(arg);
+			break;
+		//周榜：女神榜，富豪榜
+		case"zhoubang":
+			zhoubang(arg);
+			break;
+		//查询轮播图
+		case"seCarousel":
+			seCarousel(arg);
+			break;
+		case"sevipprice":
+			sevipprice(arg);
+			break;
+		case"myaidou":
+			myaidou(arg);
+			break;
+		case"vipstatus":
+			vipstatus(arg);
+			break;
+		case"se_systemset":
+			se_systemset(arg);
+			break;
+		case"senvsheng":
+			senvsheng(arg);
+			break;
+			//查询认证信息
+		case"se_renzheng":
+			se_renzheng(arg);
+			break;
+		case "is_renzheng":
+			is_renzheng(arg);
+			break;
+				//搜索功能01215
+		case "search_user":
+			search_user(arg);
+			break;
+			//查询黑名单列表
+		case"se_black_list":
+			se_black_list(arg);
+			break;
+		default:
+			break;
+		}
+	}
+	
+	//arg[2]user_id,
+	private void sefujin(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		arg=Arrays.copyOf(arg, arg.length+8); 
+		Double myjingdu = 0.0;
+		Double myweidu = 0.0;
+		Double lng = 0.0;
+		Double lat = 0.0;
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send("01182", "用户经纬度", sql);
+		list = sqlUtil.get_list(sql);
+		log.send("01182", "用户经纬度", list);
+		Double  longitude =Double.parseDouble(list.get(0).get("longitude").toString());
+		arg[9]=longitude+"";
+		myjingdu=longitude;
+		log.send("01182", "用户经度", arg[9]);
+		Double  latitude =Double.parseDouble(list.get(0).get("latitude").toString());
+		myweidu=latitude;
+		arg[10]=latitude+"";
+			int fanwei = 10000;//二十公里内
+			double[] aa = getAround(latitude, longitude, fanwei);
+			log.send(DataType.basicType, "01198", "附近查询-用户经纬度最大最小值-aa", aa+"");
+			arg[4]=aa[0]+"";  //纬度最小值
+			arg[5]=aa[2]+"";  //纬度最大值
+			arg[6]=aa[1]+"";  //经度最小值
+			arg[7]=aa[3]+"";  //经度最大值
+			sql=sqlmface.searchSqlface(1, arg);
+			//升序查询附近的主播
+			log.send("01182", "arg[4],arg[5],arg[6],arg[7]",arg[4]+"   "+arg[5]+"    "+arg[6]+"     "+arg[7]);
+			 list1=sqlUtil.get_list(sql);
+				log.send("01182", "list1", list1);
+			int total=list1.size();
+				log.send("01182", "list1",total);
+			pages = JyHelpManager.pages(arg[3], total);
+			arg[3] = pages[2] + "";
+			String ceshi3 = arg[3];
+			sql=sqlmface.searchSqlface(2, arg);
+			log.send("01182", "sql", sql);
+			list=sqlUtil.get_list(sql);
+			log.send("01182", "list", list);	
+			//l
+			for (int i = 0; i < list.size(); i++) {
+				lng=Double.parseDouble((list.get(i).get("longitude").toString()));
+				lat=Double.parseDouble(list.get(i).get("latitude").toString());
+				long juli = (long) computeDistance(myjingdu, myweidu, lng,
+						lat);
+				log.send("01182", "与我之间的距离", juli);
+				list.get(i).put("juli", juli);
+				arg[0]=list.get(i).get("id").toString();
+				sql=sqlmface.searchSqlface(3, arg);
+				log.send("01182", "list_sql", sql);	
+				int res=sqlUtil.get_int(sql);
+				log.send("01182", "res", res);	
+				if(res>=1){
+					list.get(i).put("status", "1");
+				}
+				else{
+					list.get(i).put("status", "0");
+				}
+				log.send("01182", "添加成功", juli);
+			}
+//			log.send("01182", "第几页", ceshi3);
+		inOutUtil.return_ajax(JsonUtil.listPageToJson(list, pages));
+	}
+	
+	public static double[] getAround(double lat,double lon,int raidus){  
+        //计算经纬度范围
+			double PI = 3.14159265;
+	        Double latitude = lat;  
+	        Double longitude = lon;  
+	        Double degree = (24901*1609)/360.0;  
+	        double raidusMile = raidus;  
+	        Double dpmLat = 1/degree;  
+	        Double radiusLat = dpmLat*raidusMile;  
+	        Double minLat = latitude - radiusLat;  
+	        Double maxLat = latitude + radiusLat;  
+	          
+	        Double mpdLng = degree*Math.cos(latitude * (PI/180));  
+	        Double dpmLng = 1 / mpdLng;  
+	        Double radiusLng = dpmLng*raidusMile;  
+	        Double minLng = longitude - radiusLng;  
+	        Double maxLng = longitude + radiusLng;  
+	        //System.out.println("["+minLat+","+minLng+","+maxLat+","+maxLng+"]");  
+	        return new double[]{minLat,minLng,maxLat,maxLng};  
+	    }
+	//arg[2]推荐，活跃，女神堂，arg[3]page
+	private void seactive(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		int total;
+		arg=Arrays.copyOf(arg, arg.length+8); 
+		if(("活跃").equals(arg[2])){
+			String sql=sqlmface.searchSqlface(0, arg);
+			total= sqlUtil.get_int(sql);
+			pages = JyHelpManager.pages(arg[3], total);
+			arg[3] = pages[2] + "";
+			String ceshi3 = arg[3];
+//			log.send(DataType.basicType, "01182", "推荐", ceshi3);
+			sql=sqlmface.searchSqlface(1, arg);
+			list=sqlUtil.get_list(sql);
+		}
+		else if(("推荐").equals(arg[2])){
+			String sql=sqlmface.searchSqlface(2, arg);
+			 total = sqlUtil.get_int(sql);
+			pages = JyHelpManager.pages(arg[3], total);
+			arg[3] = pages[2] + "";
+			String ceshi3 = arg[3];
+//			log.send(DataType.basicType, "01182", "活跃", ceshi3);
+			sql=sqlmface.searchSqlface(3, arg);
+			list=sqlUtil.get_list(sql);
+		}
+		else if(("女神堂").equals(arg[2])){
+			String sql=sqlmface.searchSqlface(4, arg);
+			 total = sqlUtil.get_int(sql);
+//			log.send(DataType.basicType, "01182", "女神堂", total);
+			pages = JyHelpManager.pages(arg[3], total);
+			arg[3] = pages[2] + "";
+			String ceshi3 = arg[3];
+//			log.send(DataType.basicType, "01182", "女神堂", ceshi3);
+			sql=sqlmface.searchSqlface(5, arg);
+			list=sqlUtil.get_list(sql);
+//			log.send(DataType.basicType, "01182", "女神堂", list);
+		}
+		inOutUtil.return_ajax(JsonUtil.listPageToJson(list,pages));
+	}
+
+	static class MapComparatorAsc implements Comparator<Map<String, Object>> {
+		public int compare(Map<String, Object> m1, Map<String, Object> m2) {
+			String v1 = m1.get("juli").toString().trim();
+			String v2 = m2.get("juli").toString().trim();
+			//(0, 4)(5, 7)(8, 10)(10, 12)(13, 15);
+			/*String s1 = v1.subSequence(0, 4) + "" + v1.subSequence(5, 7)
+					+ v1.subSequence(8, 10) + v1.subSequence(11, 13)
+					+ v1.subSequence(14, 16);
+			String s2                                                                                                                                                                                                                                                                                                                                                       = v2.subSequence(0, 4) + "" + v2.subSequence(5, 7)
+					+ v2.subSequence(8, 10) + v2.subSequence(11, 13)
+					+ v2.subSequence(14, 16);
+			Long s11 = Long.parseLong(s1);
+			Long s22 = Long.parseLong(s2);*/
+			if (v1 != null) {
+				return v1.compareTo(v2);
+			}
+			return 0;
+		}
+
+	}
+	//快撩 arg[2]pages
+	private void kuailiao(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01182", "sql", sql);
+		int total=sqlUtil.get_int(sql);
+		pages = JyHelpManager.pages(arg[2], total);
+		arg[2] = pages[2] + "";
+		String ceshi3 = arg[2];
+//		log.send(DataType.basicType, "01182", "kuailiao", ceshi3);
+		sql=sqlmface.searchSqlface(1, arg);
+		list=sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listPageToJson(list,pages));
+	}
+	
+	private void zhoubang(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql;
+		if(("女神榜").equals(arg[2])){
+			sql=sqlmface.searchSqlface(0, arg);
+			list=sqlUtil.get_list(sql);
+//			log.send(DataType.basicType, "女神榜_list", "", list);
+		}
+		else if(("富豪榜").equals(arg[2])){
+			sql=sqlmface.searchSqlface(1, arg);
+			list=sqlUtil.get_list(sql);
+//			log.send(DataType.basicType, "富豪榜_list", "", list);
+			
+		}
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+
+	private void seCarousel(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+//		log.send(DataType.basicType, "sql", "", sql);
+		list=sqlUtil.get_list(sql);
+//		log.send(DataType.basicType, "_list", "", list);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	//查询会员价格
+	private void sevipprice(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+//		log.send(DataType.basicType, "sevipprice", "sevipprice", "sevipprice");
+		String sql=sqlmface.searchSqlface(0, arg);
+//		log.send(DataType.basicType, "sevipprice", "sevipprice", sql);
+		list=sqlUtil.get_list(sql);
+//		log.send(DataType.basicType, "sevipprice", "sevipprice", list);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	//我的爱豆
+	private void myaidou(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+//		log.send(DataType.basicType, "myaidou", "myaidou", "myaidou");
+		String sql=sqlmface.searchSqlface(0, arg);
+//		log.send(DataType.basicType, "myaidou", "myaidou", sql);
+		list=sqlUtil.get_list(sql);
+//		log.send(DataType.basicType, "myaidou", "myaidou", list);
+		sql=sqlmface.searchSqlface(1, arg);
+		String res=sqlUtil.get_string(sql);
+		list.get(0).put("income", res);
+		sql=sqlmface.searchSqlface(2, arg);
+		res=sqlUtil.get_string(sql);
+		list.get(0).put("pay", res);
+		sql=sqlmface.searchSqlface(3, arg);
+		res=sqlUtil.get_string(sql);
+		list.get(0).put("cash", res);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+
+	private void vipstatus(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+		list=sqlUtil.get_list(sql);
+//		log.send(DataType.basicType, "vipstatus", "vipstatus", list);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	//查询系统设置
+	private void se_systemset(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+		list=sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "se_systemset", "se_systemset", list);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+
+	private void senvsheng(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+		list=sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	//查询修改的资料 arg[2]user_id
+	private void se_renzheng(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		//查询个人信息审核表的数据数量
+		String sql=sqlmface.searchSqlface(0, arg);
+		int res=sqlUtil.get_int(sql);
+		if(res>0){
+		//查询最后一条满足条件的信息
+		sql=sqlmface.searchSqlface(1, arg);
+		list=sqlUtil.get_list(sql);
+		}
+		else {
+			sql=sqlmface.searchSqlface(2, arg);
+			list=sqlUtil.get_list(sql);
+			list.get(0).put("result", "已通过");
+		}
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+	
+	
+	/**
+	 * 查询主播是否认证
+	 * arg[2] user_id
+	 * @param arg
+	 * @throws IOException 
+	 * @throws SQLException 
+	 * @throws ServletException 
+	 */
+	private void is_renzheng(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql = sqlmface.searchSqlface(0, arg);
+		int is_renzheng = sqlUtil.get_int(sql);
+		log.send(DataType.basicType, "01165", "女神认证--is_renzheng:", is_renzheng);
+			
+		
+		String jsonadd = "{\"success\":\""+is_renzheng+"\"}";
+		inOutUtil.return_ajax(jsonadd);
+		
+	}
+	
+	//通过id或者昵称查询01215
+	private void search_user(String[] arg) throws SQLException, ServletException, IOException{
+		
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "执行搜索功能",sql);
+		list = sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+	//查询黑名单列表
+	private void se_black_list(String[] arg) throws SQLException, IOException, ServletException {
+		// TODO Auto-generated method stub
+		String sql=sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01182", "执行搜索功能",sql);
+		list = sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	static class MapComparatorDesc implements Comparator<Map<String, Object>> {
+		@Override
+		public int compare(Map<String, Object> m1, Map<String, Object> m2) {
+			String v1 = m1.get("juli").toString().trim();
+			String v2 = m2.get("juli").toString().trim();
+			//(0, 4)(5, 7)(8, 10)(10, 12)(13, 15);
+			/*String s1 = v1.subSequence(0, 4) + "" + v1.subSequence(5, 7)
+					+ v1.subSequence(8, 10) + v1.subSequence(11, 13)
+					+ v1.subSequence(14, 16);
+			String s2 = v2.subSequence(0, 4) + "" + v2.subSequence(5, 7)
+					+ v2.subSequence(8, 10) + v2.subSequence(11, 13)
+					+ v2.subSequence(14, 16);
+			Long s11 = Long.parseLong(s1);
+			Long s22 = Long.parseLong(s2);*/
+			if (v2 != null) {
+				return v2.compareTo(v1);
+			}
+			return 0;
+		}
+	}
+	public double computeDistance(double lat1, double lon1, double lat2,
+			double lon2) {
+		// TODO Auto-generated method stub
+		int MAXITERS = 20;
+		// Convert lat/long to radians
+		lat1 *= Math.PI / 180.0;
+		lat2 *= Math.PI / 180.0;
+		lon1 *= Math.PI / 180.0;
+		lon2 *= Math.PI / 180.0;
+
+		double a = 6378137.0; // WGS84 major axis
+		double b = 6356752.3142; // WGS84 semi-major axis
+		double f = (a - b) / a;
+		double aSqMinusBSqOverBSq = (a * a - b * b) / (b * b);
+
+		double L = lon2 - lon1;
+		double A = 0.0;
+		double U1 = Math.atan((1.0 - f) * Math.tan(lat1));
+		double U2 = Math.atan((1.0 - f) * Math.tan(lat2));
+
+		double cosU1 = Math.cos(U1);
+		double cosU2 = Math.cos(U2);
+		double sinU1 = Math.sin(U1);
+		double sinU2 = Math.sin(U2);
+		double cosU1cosU2 = cosU1 * cosU2;
+		double sinU1sinU2 = sinU1 * sinU2;
+
+		double sigma = 0.0;
+		double deltaSigma = 0.0;
+		double cosSqAlpha = 0.0;
+		double cos2SM = 0.0;
+		double cosSigma = 0.0;
+		double sinSigma = 0.0;
+		double cosLambda = 0.0;
+		double sinLambda = 0.0;
+
+		double lambda = L; // initial guess
+		for (int iter = 0; iter < MAXITERS; iter++) {
+			double lambdaOrig = lambda;
+			cosLambda = Math.cos(lambda);
+			sinLambda = Math.sin(lambda);
+			double t1 = cosU2 * sinLambda;
+			double t2 = cosU1 * sinU2 - sinU1 * cosU2 * cosLambda;
+			double sinSqSigma = t1 * t1 + t2 * t2; // (14)
+			sinSigma = Math.sqrt(sinSqSigma);
+			cosSigma = sinU1sinU2 + cosU1cosU2 * cosLambda; // (15)
+			sigma = Math.atan2(sinSigma, cosSigma); // (16)
+			double sinAlpha = (sinSigma == 0) ? 0.0 : cosU1cosU2 * sinLambda
+					/ sinSigma; // (17)
+			cosSqAlpha = 1.0 - sinAlpha * sinAlpha;
+			cos2SM = (cosSqAlpha == 0) ? 0.0 : cosSigma - 2.0 * sinU1sinU2
+					/ cosSqAlpha; // (18)
+
+			double uSquared = cosSqAlpha * aSqMinusBSqOverBSq; // defn
+			A = 1
+					+ (uSquared / 16384.0)
+					* // (3)
+					(4096.0 + uSquared
+							* (-768 + uSquared * (320.0 - 175.0 * uSquared)));
+			double B = (uSquared / 1024.0) * // (4)
+					(256.0 + uSquared
+							* (-128.0 + uSquared * (74.0 - 47.0 * uSquared)));
+			double C = (f / 16.0) * cosSqAlpha
+					* (4.0 + f * (4.0 - 3.0 * cosSqAlpha)); // (10)
+			double cos2SMSq = cos2SM * cos2SM;
+			deltaSigma = B
+					* sinSigma
+					* // (6)
+					(cos2SM + (B / 4.0)
+							* (cosSigma * (-1.0 + 2.0 * cos2SMSq) - (B / 6.0)
+									* cos2SM
+									* (-3.0 + 4.0 * sinSigma * sinSigma)
+									* (-3.0 + 4.0 * cos2SMSq)));
+
+			lambda = L
+					+ (1.0 - C)
+					* f
+					* sinAlpha
+					* (sigma + C
+							* sinSigma
+							* (cos2SM + C * cosSigma
+									* (-1.0 + 2.0 * cos2SM * cos2SM))); // (11)
+
+			double delta = (lambda - lambdaOrig) / lambda;
+			if (Math.abs(delta) < 1.0e-12) {
+				break;
+			}
+		}
+		return b * A * (sigma - deltaSigma);
+	}
+	}

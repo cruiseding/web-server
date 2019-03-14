@@ -1,0 +1,197 @@
+<!DOCTYPE HTML>
+<html style="font-size: 20px;">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, maximum-scale=1.0, user-scalable=yes" />
+		<script src="http://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
+<script>
+    
+</script>
+<style>
+    html, body {
+        font-family: sans-serif;
+        font-size: 0.7rem;
+        height: 100%;
+    }
+
+html, body, div, object, iframe, applet, object, h1, h2, h3, h4, h5, h6, p, blockquote, pre, address, dl, dt, dd, ol, ul, li {
+    margin: 0;
+    padding: 0;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.blue_bac{
+    background: rgba(255, 210, 31, 1);
+}
+.white_bac{
+    background:white;
+    border-radius:1rem;
+    margin:1rem;
+    text-align:center;
+}
+.huanyizhang{
+    width: 5rem;
+    margin:auto;
+    border-radius: 1rem;
+    border: 2px solid;
+    background: rgba(255, 210, 31, 1);
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-weight: bold;
+}
+.background_img{
+    
+    margin:auto;
+    width:14rem;
+    height:21rem;
+    border:2px solid black;
+}
+.erweima_img{
+    position: relative;
+    top: -5rem;
+    width: 4rem;
+    height: 4rem;
+    margin-top: -8rem;
+}
+.baocun{
+    width: 10rem;
+    margin:auto;
+    border-radius: 1rem;
+    border: 2px solid;
+    background: rgba(230, 84, 54, 1);
+    height: 1.5rem;
+    line-height: 1.5rem;
+    font-weight: bold;
+    color:white;
+    border:2px solid black;
+}
+</style>
+</head>
+<body class="blue_bac">
+    <div class="white_bac">
+        <br>
+        <div class="huanyizhang" onclick="copy()">
+            换一张
+        </div><br>
+		<div id="jietu">
+        <!-------大图片------->
+        <div class="background_img" id="">
+            <img class="" style="width: 14rem;height: 21rem;" id="qrcodeimg" src="100.jpg" />
+        </div>
+        <img class="erweima_img" id="qrimg" src="10000081.jpg" />
+        <!--div class="background_img">
+         
+        <img class="erweima_img" src="http://t11.baidu.com/it/u=3021434284,1263860477&fm=173&app=25&f=JPEG?w=639&h=355&s=5F228644C400C2F51AAAE4840300A0AB" />
+        </div-->
+        <br>
+		</div>
+        <div class="baocun" onclick="downs()">
+            点我保存专属二维码到相册
+        </div><br>
+		
+		 <!-- <a class="down" href="" download="downImg">下载</a> -->
+    </div>
+	
+		  <script src="https://cdn.bootcss.com/html2canvas/0.5.0-beta4/html2canvas.js"></script>
+<script>
+    //直接选择要截图的dom，就能截图，但是因为canvas的原因，生成的图片模糊
+	var i=1;
+	var a='';
+	
+	function GetQueryString(name)
+	{
+		 var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+		 var r = window.location.search.substr(1).match(reg);//search,查询？后面的参数，并匹配正则
+		 if(r!=null)return  unescape(r[2]); return null;
+	}
+	
+	var myurl=GetQueryString("qrcode");
+	if(myurl !=null && myurl.toString().length>1)
+	{
+	   document.getElementById("qrimg").src=myurl;
+	}
+	
+	
+	function copy(){
+	    if(i==0){
+			document.getElementById("qrcodeimg").src="100.jpg";
+			i=1;
+		}else if(i==1){
+			document.getElementById("qrcodeimg").src="112.jpg";
+			i=2;
+		}else if(i==2){
+			document.getElementById("qrcodeimg").src="113.jpg";
+			i=3;
+		}else if(i==3){
+			document.getElementById("qrcodeimg").src="115.jpg";
+			i=4;
+		}else if(i==4){
+			document.getElementById("qrcodeimg").src="125.jpg";
+			i=5;
+		}else{
+			document.getElementById("qrcodeimg").src="126.jpg";
+			i=0;
+		}
+	    
+		html2canvas(document.getElementById("jietu")).then(function(canvas) {
+            //document.body.appendChild(canvas);
+            //canvas转换成url，然后利用a标签的download属性，直接下载，绕过上传服务器再下载
+			a=canvas.toDataURL();
+            //document.querySelector(".down").setAttribute('href',canvas.toDataURL());
+        });
+	 }
+	 function downs(){
+	        //alert(canvas2.toDataURL());
+	        if(isAndroid){
+			   shares.downloadimg(a);
+			}else{
+			   calliOS_downloadimg(a);
+			}
+	 }
+	 
+	 function calliOS_downloadimg(Msg) {
+        var message = {
+            'method' : 'shares.downloadimg',
+            'param1' : Msg,
+        };
+        window.webkit.messageHandlers.webViewApp.postMessage(message);
+    }
+	
+    html2canvas(document.querySelector('div')).then(function(canvas) {
+	canvas.style.display="none";
+            document.body.appendChild(canvas);
+     })
+    //创建一个新的canvas
+    var canvas2 = document.createElement("canvas");
+    var _canvas = document.getElementById("jietu");
+    var w = parseInt(window.getComputedStyle(_canvas).width);
+    var h = parseInt(window.getComputedStyle(_canvas).height);
+    //将canvas画布放大若干倍，然后盛放在较小的容器内，就显得不模糊了
+    canvas2.width = w*2 ;
+    canvas2.height = h *2;
+    canvas2.style.width = w + "px";
+    canvas2.style.height = h + "px";
+    //可以按照自己的需求，对context的参数修改,translate指的是偏移量
+    //  var context = canvas.getContext("2d");
+    //  context.translate(0,0);
+    var context = canvas2.getContext("2d");
+    context.scale(2,2);
+     html2canvas(document.getElementById("jietu")).then(function(canvas) {
+            //document.body.appendChild(canvas);
+            //canvas转换成url，然后利用a标签的download属性，直接下载，绕过上传服务器再下载
+            //document.querySelector(".down").setAttribute('href',canvas.toDataURL());
+			a=canvas.toDataURL();
+     });
+	 
+	var u = navigator.userAgent;
+    var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1;
+	 
+	 
+	   
+	 
+</script>
+	
+</body>
+</html>

@@ -1,0 +1,66 @@
+package com.net.aipeng.redirect.resolverD.interface4.zhufubao;
+
+
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Map;
+
+import com.net.aipeng.classroot.interface4.JyLogDetect;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+
+//import com.net.feimiaoquan.classroot.interface4.JyLogDetect;
+//import com.net.feimiaoquan.classroot.interface4.JyLogDetect.DataType;
+//
+
+
+public class Ordercreat {
+
+	/** 支付宝支付业务：入参app_id */
+	public static final String APPID = "2018081761065741";
+	//public static final String APPID = "2016092800617116";
+	//支付宝公钥
+	public static final String ALIPAY_PUBLIC_KEY="MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgNMrsuQby7/P6Hl69rghPEKG+qWzkqWU+qmJAEcKDBPPAxS0iPugAZyNh3Ub1154PpkCHR/+3DfG3ToCTkzGQYQvNzdntQ0Icu9R6KOR6EGoAFYvx3TMyRzSRU/28g6whz87z90oeCjPvUO3tn+g72CZFqDx1yRTr+An/UI7GCFDBzLYg+cV8h3gPXlX8PEg6dH1VLPAh9sZ9Q5bPehOmwh63a5zy/ijJLgK93FpkW3+qgraYCJlkhbFVP9iBzxOwR56oxItCuaM38TMBHRA99ID4j3zFgPman6Qjbnp4LJjZmn9NzigwrlIozt2otPi2ELmabUWv8o5ZuXtx2LrMwIDAQAB";
+	
+	/** 支付宝账户登录授权业务：入参pid值 */
+	public static final String PID = "";
+	/** 支付宝账户登录授权业务：入参target_id值 */
+	public static final String TARGET_ID = "";
+
+	/** 商户私钥，pkcs8格式 */
+	/** 如下私钥，RSA2_PRIVATE 或者 RSA_PRIVATE 只需要填入一个 */
+	/** 如果商户两个都设置了，优先使用 RSA2_PRIVATE */
+	/** RSA2_PRIVATE 可以保证商户交易在更加安全的环境下进行，建议使用 RSA2_PRIVATE */
+	/** 获取 RSA2_PRIVATE，建议使用支付宝提供的公私钥生成工具生成， */
+	/** 工具地址：https://doc.open.alipay.com/docs/doc.htm?treeId=291&articleId=106097&docType=1 */
+	//支付宝商户私钥
+	public static final String RSA2_PRIVATE = "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCa9gEjQKOnyTOLvLHC5X13bSs8gphLInjMWG+fMUMOdNHixgjwMK18cgrmbrO5sstbHrA0KsVDV5Kvp81ODI9VHzSWWefg1wBYtzWVsCe6x3uZy15i77B/anvj/i26jwWucqLA3R753Spqldc5lWDJumWUMnXoWmPOlh+A2ylhJfm4VdCpHmjkOzU1epvAnqjHQ5/Nf3LLGkj9UFV51rl4JaalWnSd4fOM0KE0EubF8sVO757K5olv+rsSm4kcsAlubSG+Hl8MhoqJb378bOzUWgmJBEaMIB8UcaboCfQJj9H9akQH9NohBEb6RCo77m0XuFeIdna4P5/nEIOopjLbAgMBAAECggEAJod6OvCsgGB3j4wISuRSsOoU8QOrqCrXDEAE6PkPqj2DnjYNLON9j06vxSHLUCXTiEF2IFJuH9NbZo97baeTz99lbOjHzdDHhkdvbFuTVU6aPeAiBMmCAfxQ95xQdG1xRTG9o+SW+htym3PMQsYQfbf538I4LOCkpk4PYTOc80lgOyOcvSrMh7XK2vqVr8olPEa8jr69e7csZi3Sh4N/OpAOi82E18E0lAFEX1Cxlja9oVbhIpdHOu2kp/6mu0lW/TeN+MV+fIGoP7ptUtt2Okpp2KRW1bafAb+TDqzyDeGTe0FaDs7sjdhf/g7KordapNOM6fJ2XOTy2juSArwz+QKBgQDvL4gAAb6rJS0euCKw5Zqz+H/2pdGARGG65RkOGsBN4kyPWHQVIw5O6Tmp0b68rEalYeS/yFZiIyTFXXndxjmcTn0qN/opdjH+pMOXxatXu0stkGz68b1x9CeJ+lK/GHnyNmgIA9J8ZDDjhRyOfxtuoV6LL5qo+vcXRDkI3mr1BwKBgQCl2rxg5NcQ5KUSMEb8pkNEwD+WJ1RE53Ry7QZUd/Tl/9dYcAr7zyCucGBd8qCQvMWgAtclLkNFGXMBw1g0RSIKrM2vGB1XAMwHBlwL9LaZfCYXu3mQWccBxIQqb3+szHRpy51OaRLOpsUAGUCr0SdORJvZPMtFgmlrYW7USXdSjQKBgQCpcPecYaAMKBL1ryZMQOu+UO198mwevNKrDr8YIdVXl1f7OINLsgDh4BDMf9zqVfTaFiZxwl+HuDPFaXn6pQGM/IFo1izvEF9McLZrH0pJpVIVnjnF8FjvkDIuadoSrCk/cFF0VBjZrDSCCXt4aw0o60JJwdiDmv5OSjNJWB9XIwJ/C6lVlXqBpK5u7Nh4JUuLb0oVLnmVc0LS7UG9MDM/BOz4Nz+phgsKQTmljPWCVKrxOk740aRvFmyzqWwSx5oUyqtbyvPnHDbyIYxQ7IZIUIJqK0EDSyME2xr2MAWm9H9rsAShCuJYcC9Jqrgb0/jgyqAIVT3xDPIed25iXIrN2QKBgQDK2LE9SQMeMF7p+QfMtrd9aq3OzD17cSOXZPImbwvaItJ4pINUN5GjUa9FNUi3SjTXRgBJ9tPx0dToOxi3+irdznh8B89tlR4niKqmiE645fzpOwGjV6APZ7nSTfGwU9WFfLVh1WCk+a0WtB5o//vev3cT6ZnLUNA/+0Lgf4lx8Q==";
+	//public static final String RSA_PRIVATE = "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDHJZjKhN2eGCzHeDaZMkf4OHbpaFAeh0xlZNHtBVlbJZ009ObF0zrEYlemFbY0tdFd6F+NfvwLYf7eWglK+EytGBtJ+avdLUpUbKmxte9TB+CXqKm2fnqT09rBOoxx9PZIsnje4XUlqKMXxdByNYpQKvL1PmsJPpiuMQhzQ2X68R+UvjxH0nCkUIs+chcjVX06Dw/A3UaEIYVWJFwLoY1ttA+zQGia6Nli9N9AiOw5xqhmXmCjcPGR1pFRwM5htXdkox7i8MUziJDok6muWnNMsG6zPthO1x6Sx3BVRgXlTr9Sh7Kxl9umxjJjm3lrVA5ji+SVnMy+NJ39btPdiefLAgMBAAECggEAUpd5IqSv9N051RA6NJbx2jQwvOSSNdcPDA4gMhjB0ldrN4dKHklYWhIfH7ZpdrrhNf0lg91iUqY1uanFqN4JjtAsoSV27afW5+SZDCbUNq9RqhQ9Ln6N/7khRHovvSNG8SdzkZwXpaKm4TkdFgC2eEEXujZE1fSsBbI4OvV82fFi8GcPqSDr7iV4JO8yQhXjYppsmjGJckzoh44yHObi5JFNkhZMXuS9OHZ/f7eWWSO2/fyhUoUFHS6vKE9SOVLDgDXFKicXmJBM0J0EsijN0SpXKwLIzQaDQ7U/Kv9gf0Mdo7MlicXkh/vt+C0qk7KUkAesyrKk8tSmwUss7X2bwQKBgQDwDHr7hNQ0zlyDBPTQp2oTP0/ENPRQRkDRIH+SEZ6Q6lvrlqOkImQIISsW9h6fcYMjFBF0vTIIeat4h8aXV3Rw4XT+8SPgJe2s26xNIHkFWayaqv9AOTNa37uPR13/V0QgY4fv6Fa1n0+gU1cgyPdBVbx6sG5gV99u4p7ePSZH0wKBgQDUYVNqM7+Ib/RZgQo5ZhrB3rzkMubuSzroiRFQckKVU7i4EPjb7lE9VaU8/HmJ6+wdNcjD0ksyKaa+AJUcGLY5TsM6gYb0M56u2FSH2asHANcRR1XS7y4kIDkZc32/9xUV/zq/dkzOV6F2te5Ys5Gn/rzx/ea7UIEFwdgTiLSdKQKBgHc8K8ZNZz7Hlio6RwRxc/4Vf6CdERHio4V9GADNIa8nyfrOe4Am2Ps0xnuESxe1wYamDDmpVHXjQan//0PjW+JKCtwrmT9Yd6NaBk7VJ2fh8BtvfpQ/FWQ5J6f2shkIFr3j0nz3MkLK3DltzCRrzm00kgd7JYhTfZdNl84aH66jAoGAS80c95fWsby7qsJqwsfVnwJ/yrb8Q2rocJyTaHIPn7qNAG1WVTD/H/QUkOrP+lERKe/LY1EIc7P4BnKwxaFwUI3zEkuuvjQ6W89shDxFVa+QE2OxlyK1BkHV/2aAKGboyLwa3ME9cpxGTddrZY9Z2msKRxjHJG38TvC7zWUKidkCgYEAnCc95bGVk4FLZmp+eBtRPgGdnBEWVccpcQg5u9CLjs0txwzGMD1ceXDY3zfLoowFgTgim7chSCQHfDoV2yx+tx3+afbQ4frD/dBhNVJLs9idcQErlJJ5W9/TSVR3+X6DuWWq/hC4P1BSxWhFuqgA94KmlsXi+k85HWwHR/MNNkk=";
+	public static final String RSA_PRIVATE = "";
+	//public static final String RSA2_PRIVATE ="";
+	private static final int SDK_PAY_FLAG = 1;
+	private static final int SDK_AUTH_FLAG = 2;
+	
+	public static String order_creat(String content) {
+		
+		/**
+		 * 这里只是为了方便直接向商户展示支付宝的整个支付流程；所以Demo中加签过程直接放在客户端完成；
+		 * 真实App里，privateKey等数据严禁放在客户端，加签过程务必要放在服务端完成；
+		 * 防止商户私密数据泄露，造成不必要的资金损失，及面临各种安全风险； 
+		 * 
+		 * orderInfo的获取必须来自服务端；
+		 */
+		JyLogDetect log = new JyLogDetect();
+        boolean rsa2 = (RSA2_PRIVATE.length() > 0);
+		Map<String, String> params = OrderInfoUtil2_0.buildOrderParamMap(APPID, rsa2,content);
+		String orderParam = OrderInfoUtil2_0.buildOrderParam(params);
+		log.send(DataType.basicType, "01178", "orderParam::::::::", orderParam);
+
+		String privateKey = rsa2 ? RSA2_PRIVATE : RSA_PRIVATE;
+		String sign = OrderInfoUtil2_0.getSign(params, privateKey, rsa2);
+		log.send(DataType.basicType, "01178", "sign::::::::", sign);
+		String orderInfo = orderParam + "&" + sign;
+		return orderInfo;
+	}
+
+}

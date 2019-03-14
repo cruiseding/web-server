@@ -1,0 +1,72 @@
+package com.net.aipeng.redirect.resolverD.interface2;
+
+
+
+import java.sql.SQLException;
+
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+
+//import com.net.feimiaoquan.classroot.interface2.mA.fmqSqlMFace;
+//import com.net.feimiaoquan.classroot.interface2.mA.fmqSqlManager;
+//import com.net.feimiaoquan.classroot.interface4.JyLogDetect.DataType;
+
+
+public class PaySqlUser extends aipengSqlManager implements aipengSqlMFace {
+	@Override
+	public String addSqlface(int current, String[] arg) throws SQLException {
+
+	switch (arg[1]) {
+	case "zfbpay":
+		if(current==0){//
+			ressql="insert into pay_table (user_id, re_money, re_mode, re_state, re_time, order_num) "
+					+ " values('"+arg[2]+"','"+arg[3]+"','"+arg[4]+"','未付款',now(),'"+arg[0]+"') ";
+		}else if(current==1){
+			ressql="select * from pay_table where order_num='"+arg[0]+"'";
+		}
+			break;
+			
+	}
+		log.send(DataType.specialType, "01162", arg[1], ressql);
+		return ressql;
+	}
+
+	@Override
+	public String deleteSqlface(String[] arg) throws SQLException {
+
+		switch (arg[1]) {
+
+		}
+
+		return ressql;
+	}
+
+	@Override
+	public String modSqlface(int current, String[] arg) throws SQLException {
+
+		switch (arg[1]) {
+			
+				
+		}
+		log.send(DataType.specialType, "01162", arg[1], ressql);
+		return ressql;
+	}
+
+	@Override
+	public String searchSqlface(int current, String[] arg) throws SQLException {
+
+		switch (arg[1]) {
+		
+		case "myself":
+			break;
+			
+		
+		}
+		
+		
+		log.send(DataType.specialType, "01162", arg[1], ressql);
+		return ressql;
+		}
+	
+}

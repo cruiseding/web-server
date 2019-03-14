@@ -1,0 +1,258 @@
+package com.net.aipeng.redirect.resolverD.interface1;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutFace;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutManager;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface4.JsonUtil;
+import com.net.aipeng.classroot.interface4.JyHelpManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+import com.net.aipeng.redirect.resolverD.interface2.aipengSqlUser_01198D;
+
+public class aipengInoutUser_01198D extends aipengInOutManager implements
+		aipengInOutFace {
+	protected ArrayList<Map<String, Object>> list;
+	protected ArrayList<Map<String, Object>> list1;
+	protected ArrayList<Map<String, Object>> list2;
+	protected ArrayList<Map<String, Object>> list3;
+	protected ArrayList<Map<String, Object>> list4;
+	protected String json = "";
+	aipengSqlMFace sqlmface = new aipengSqlUser_01198D();
+	JyHelpManager helpmanager=new JyHelpManager();
+
+	public aipengInoutUser_01198D(String[] arg, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException,
+			SQLException {
+		super(arg, request, response);
+	}
+
+	@Override
+	public void addface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		//申请分享提现
+		case "cash_withdrawal":
+			cash_withdrawal(arg);
+			break;
+		}
+	}
+	/**
+	 * 申请分享提现------01198
+	 * arg[2]			user_id		用户id
+	 * arg[3]			cash		提现金额
+	 * @param arg
+	 * @throws SQLException
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void cash_withdrawal(String[] arg) throws SQLException, ServletException, IOException {
+		arg[0]=helpmanager.order_create();
+		
+		String sql = sqlmface.addSqlface(0,arg);
+		log.send(DataType.basicType, "01198", "申请提现-sql:", sql);
+		int success = sqlUtil.sql_exec(sql);
+		log.send(DataType.basicType, "01198", "申请提现-success:", success);
+		
+		String sql1 = sqlmface.addSqlface(1,arg);
+		log.send(DataType.basicType, "01198", "用户表扣除提现金额-sql1:", sql1);
+		int success1 = sqlUtil.sql_exec(sql1);
+		log.send(DataType.basicType, "01198", "用户表扣除提现金额-success1:", success1);
+		
+		if(success ==1 && success1==1){
+			String jsonadd = "{\"success\":\"1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			String jsonadd = "{\"success\":\"0\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+		
+	}
+
+	@Override
+	public void modface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		
+		}
+	}
+	
+	
+	@Override
+	public void deleteface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		
+		}
+	}
+
+	
+
+	@Override
+	public void searchface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		//查询分享提现记录
+		case "search_withdrawal_record"://180929创建
+			search_withdrawal_record(arg);
+			break;
+		//查询奖励明细
+		case "search_reward_details":
+			search_reward_details(arg);
+			break;
+		//查询推广信息
+		case "search_popularize":
+			search_popularize(arg);
+			break;
+		//查询邀请的男/女用户信息
+		case "search_invited":
+			search_invited(arg);
+			break;
+		}
+	}
+	/**
+	 * 查询邀请的男/女用户信息------01198
+	 * arg[2]		promoter_id		邀请人id
+	 * arg[3]		gender			被邀请人性别
+	 * @param arg
+	 * @throws SQLException
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void search_invited(String[] arg) throws SQLException, ServletException, IOException{
+		
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "查询邀请的男/女用户信息-sql",sql);
+		list=sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "01198", "查询邀请的男/女用户信息-list",list);
+		
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+
+	/**
+	 * 查询推广信息------01198
+	 * @param arg
+	 * @throws SQLException
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void search_popularize(String[] arg) throws SQLException, ServletException, IOException{
+		//查询收入总额和可提现余额
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "查询收入总额和可提现余额-sql",sql);
+		list=sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "01198", "查询收入总额和可提现余额-list",list);
+		
+		//查询总邀请人数
+		String sql1 = sqlmface.searchSqlface(1, arg);
+		log.send(DataType.basicType, "01198", "查询总邀请人数-sql1",sql1);
+		list1=sqlUtil.get_list(sql1);
+		log.send(DataType.basicType, "01198", "查询总邀请人数-list1",list1);
+		
+		//查询邀请男号人数
+		String sql2 = sqlmface.searchSqlface(2, arg);
+		log.send(DataType.basicType, "01198", "查询邀请男号人数-sql2",sql2);
+		list2=sqlUtil.get_list(sql2);
+		log.send(DataType.basicType, "01198", "查询邀请男号人数-list2",list2);
+		
+		//查询邀请女号人数
+		String sql3 = sqlmface.searchSqlface(3, arg);
+		log.send(DataType.basicType, "01198", "查询邀请男号人数-sql3",sql3);
+		list3=sqlUtil.get_list(sql3);
+		log.send(DataType.basicType, "01198", "查询邀请男号人数-list3",list3);
+		
+		//查询今日总收益
+		String sql4 = sqlmface.searchSqlface(4, arg);
+		log.send(DataType.basicType, "01198", "查询今日总收益-sql4",sql4);
+		list4=sqlUtil.get_list(sql4);
+		log.send(DataType.basicType, "01198", "查询今日总收益-list4",list4);
+		
+		if("".equals(list1.get(0).get("count1")) || "null".equals(list1.get(0).get("count1"))){
+			list.get(0).put("count_num", "0");
+		}else{
+			list.get(0).put("count_num", list1.get(0).get("count1"));
+		}
+		
+		if("".equals(list2.get(0).get("count2")) || "null".equals(list2.get(0).get("count2")) ){
+			list.get(0).put("count_man", "0");
+		}else{
+			list.get(0).put("count_man", list2.get(0).get("count2"));
+		}
+		
+		if("".equals(list3.get(0).get("count3")) || "null".equals(list3.get(0).get("count3")) ){
+			list.get(0).put("count_women", "0");
+		}else{
+			list.get(0).put("count_women", list3.get(0).get("count3"));
+		}
+		
+		if("".equals(list4.get(0).get("count4")) || "null".equals(list4.get(0).get("count4")) || list4==null){
+			list.get(0).put("count_today", "0");
+		}else{
+			list.get(0).put("count_today", list4.get(0).get("count4"));
+		}
+
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+
+	/**
+	 * 查询奖励明细------01198
+	 * @param arg
+	 * @throws SQLException
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void search_reward_details(String[] arg) throws SQLException, ServletException, IOException {
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "查询奖励明细-sql",sql);
+		list=sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "01198", "查询奖励明细-list",list);
+
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+
+	/**
+	 * 查询分享提现记录------01198
+	 * arg[2]		user_id		用户id
+	 * @param arg
+	 * @throws SQLException
+	 * @throws ServletException
+	 * @throws IOException
+	 */
+	private void search_withdrawal_record(String[] arg) throws SQLException, ServletException, IOException {
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01198", "查询分享提现记录-sql",sql);
+		list=sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "01198", "查询分享提现记录-list",list);
+
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+	
+
+	
+}

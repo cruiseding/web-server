@@ -1,0 +1,464 @@
+package com.net.aipeng.redirect.resolverC.interface1.mA;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.math.BigDecimal;
+import java.net.URL;
+import java.net.URLConnection;
+import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import javax.imageio.ImageIO;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutFace;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutManager;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface4.JsonUtil;
+import com.net.aipeng.classroot.interface4.JyHelpManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+import com.net.aipeng.redirect.resolverC.interface2.mA.aipengSqlUser_C_01182;
+import com.net.aipeng.redirect.resolverD.interface1.share_agentinfo;
+import com.sun.org.apache.bcel.internal.generic.INSTANCEOF;
+
+public class AppointInoutUser_C_01066 extends aipengInOutManager implements
+		aipengInOutFace {
+	protected ArrayList<Map<String, Object>> list=new ArrayList<Map<String, Object>>();
+	protected ArrayList<Map<String, Object>> list1;
+	protected ArrayList<Map<String, Object>> list2;
+	protected ArrayList<Map<String, Object>> list3;
+	protected ArrayList<Map<String, Object>> list4;
+	protected ArrayList<Map<String, Object>> list5;
+	protected ArrayList<Map<String, Object>> list6;
+	protected ArrayList<Map<String, Object>> list7;
+	protected ArrayList<Map<String, Object>> listzong;
+	protected String json = "";
+	aipengSqlMFace sqlmface = new aipengSqlUser_C_01182();
+
+	public AppointInoutUser_C_01066(String[] arg, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException,
+			SQLException {
+		super(arg, request, response);
+	}
+
+	@Override
+	public void addface() throws SQLException, ServletException, IOException {
+		// TODO Auto-generated method stub
+		switch (arg[1]) {
+
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void modface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+
+		default:
+			break;
+		}
+
+	}
+
+	@Override
+	public void deleteface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		default:
+			break;
+		}
+	}
+
+	@Override
+	public void searchface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+
+		case "search_my_appointinfo":
+			try {
+				search_my_appointinfo(arg);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			break;
+
+			
+		case "search_user_appointinfo":
+			search_user_appointinfo(arg);
+			break;
+			
+		case "appointadd":
+			appointadd(arg);
+			break;
+
+		case "appointupbf":
+			appointupbf(arg);
+			break;
+			
+		case "appointup":
+			appointup(arg);
+			break;
+
+		case "searchmyinfo":
+			searchmyinfo(arg);
+			break;	
+			
+		case "zhubo_online":
+			zhubo_online(arg);
+			break;	
+		case "getqrcode":
+			getqrcode(arg);
+			break;			
+		default:
+			break;
+		}
+	}
+	
+	
+	/**
+	 * 生成二维码海报图片
+	 * @param arg
+	 * 
+	 * arg[0]: A-user-search
+	 * arg[1]: getqrcode
+	 * arg[2]: userid
+	 */
+	private void getqrcode(String[] arg) {
+		response.setContentType("image/jpeg");
+		
+		log.send(DataType.basicType, "01156", "getqrcode: ", "start");
+		try {
+			// 获取海报背景图
+			//String url = "http://12nm.cn/img/haibao/haibao1.jpg";
+			String url="http://120.27.98.128:9810/img/qrcodebg.jpg";
+			log.send(DataType.basicType, "01156", "qrcodeUrl: ", url);
+			// BufferedImage bkBfImg = toBufferedImage(Toolkit.getDefaultToolkit().getImage(url));
+			URL url2 = new URL(url);
+			URLConnection conn2 = url2.openConnection();
+			BufferedImage bkBfImg = ImageIO.read(conn2.getInputStream());
+			// 生成二维码
+			//http://12nm.cn/uiface/user/invitation.jsp?userid=${json}
+			//String qrcodeUrl = "http://12nm.cn/uiface/user/invitation.jsp?userid="+arg[2];
+            //
+			String qrcodeUrl = request.getScheme()+"://"+request.getServerName()+"/uiface/login?a=A-user-search&b=shareqrcode&c="+arg[2];
+			log.send(DataType.basicType, "01156", "qrcodeUrl: ", qrcodeUrl);
+			BufferedImage bi = share_agentinfo.createCodeStream(qrcodeUrl);
+			Graphics g = bkBfImg.getGraphics();
+			//String sqlm = "select bahao,photo from member_list where id ="+arg[2];
+			//list = sqlUtil.get_list(sqlm);
+			//log.send(DataType.basicType, "01150", "========", list);
+			
+			//String hao = list.get(0).get("bahao").toString();
+			//String touxiang = list.get(0).get("photo").toString();
+			//URL url3 = new URL(touxiang);
+			//URLConnection conn3 = url3.openConnection();
+			//BufferedImage headBfImg = ImageIO.read(conn3.getInputStream());
+			//Image headImg = headBfImg.getScaledInstance(180, 180, Image.SCALE_DEFAULT);
+			//Image headImg = headBfImg.getScaledInstance(50, 50, Image.SCALE_DEFAULT);
+			//Image qrImg = bi.getScaledInstance(500, 500, Image.SCALE_DEFAULT);// 二维码缩放
+			Image qrImg = bi.getScaledInstance(208, 208, Image.SCALE_DEFAULT);// 二维码缩放
+			//g.drawImage(bi,769,2138,null);
+			g.drawImage(qrImg,165,372,null);
+			//g.drawImage(headImg, 1130, 1900, null);
+			//g.drawImage(headImg, 270,441, null);
+			//g.setColor(Color.RED);
+			//g.setFont(new Font("微软雅黑",Font.BOLD,15));
+			//g.drawString("相亲吧号：", 1050, 2150);
+			//g.drawString("相亲吧号："+hao, 1050, 2150);
+			//g.drawString("ID: "+hao, 238, 510);
+			response.reset();
+			ImageIO.write(bkBfImg, "JPEG",response.getOutputStream());
+			log.send(DataType.basicType, "01156", "getqrcode: ", "finished");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			log.send(DataType.exceptionType, "01156", "getqrcode: ", "exception: "+e);
+		}
+	}
+	
+	
+	private void zhubo_online(String[] arg) throws SQLException, IOException, ServletException {
+		String sql = "";
+		
+		if(num > 0) {
+			String jsonadd = "{\"success\":\"6\"}";
+			log.send("01160", "jsonadd 6:", jsonadd);
+			inOutUtil.return_ajax(jsonadd);
+			return;
+		}
+	
+		String jsonadd = "{\"success\":\"3\"}";//忙碌
+		log.send("01160", "jsonadd 3:", jsonadd);
+		inOutUtil.return_ajax(jsonadd);
+	}
+	
+
+	private void searchmyinfo(String[] arg) throws SQLException, IOException,
+	ServletException {
+		// TODO Auto-generated method stub
+		String sql="update user_data set latitude='"+arg[3]+"',longitude='"+arg[4]+"' where id='"+arg[2]+"'";
+		sqlUtil.sql_exec(sql);
+		sql="select * from user_data where id="+arg[2];
+		list=sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+		//int toap_price=Integer.parseInt(Math.ceil(totle*0.5)+"");
+	
+	
+	}
+	
+	
+	private void appointupbf(String[] arg) throws SQLException, IOException,
+	ServletException {
+		// TODO Auto-generated method stub
+		String[] times=arg[6].split(",");
+		int succ=0;
+		
+		String sql="select videochat_price,voicechat_price from roles_table where user_id="+arg[3];
+		list=sqlUtil.get_list(sql);
+		int price=0;
+		if(arg[7].equals("0")){
+			price=Integer.parseInt(list.get(0).get("videochat_price").toString());
+		}else{
+			price=Integer.parseInt(list.get(0).get("voicechat_price").toString());
+		}
+		int totle=(price*Integer.parseInt(arg[5])*times.length);
+		int process_price=Integer.parseInt(Math.ceil(totle*0.15)+"");
+		String jsonadd = "{\"totle\":\""+totle+"\",\"process_price\":\""+process_price+"\"}";
+		inOutUtil.return_ajax(jsonadd);
+		
+		//int toap_price=Integer.parseInt(Math.ceil(totle*0.5)+"");
+	
+	
+	}
+	
+	
+	private void appointup(String[] arg) throws SQLException, IOException,
+			ServletException {
+		// TODO Auto-generated method stub
+		String[] times=arg[6].split(",");
+		int succ=0;
+		
+		String sql="select balance from user_data where id="+arg[2];
+		int balance=sqlUtil.get_int(sql);
+		
+		sql="select videochat_price,voicechat_price from roles_table where user_id="+arg[3];
+		list=sqlUtil.get_list(sql);
+		int price=0;
+		if(arg[7].equals("0")){
+			price=Integer.parseInt(list.get(0).get("videochat_price").toString());
+		}else{
+			price=Integer.parseInt(list.get(0).get("voicechat_price").toString());
+		}
+		int totle=(price*Integer.parseInt(arg[5])*times.length);
+		int process_price=Integer.parseInt(Math.ceil(totle*0.15)+"");
+		int toap_price=Integer.parseInt(Math.ceil(totle*0.5)+"");
+		
+		if(balance>=(totle+process_price)){
+			for(int i=0;i<times.length;i++){
+				
+				//apstatus   0 申请中  1同意申请  2 拒绝申请  3.成功  4.预约者违约  5 被预约者违约
+				sql = "insert into appoint_list (user_id,touser_id,appointday,appoint_type,appointtimes,ap_type,ap_price,process_price,unit_price,toap_price,ap_time,start_time,end_time) values ('"
+						+ arg[2]
+						+ "','"
+						+ arg[3]
+						+ "','"
+						+ arg[4]
+						+ "','"
+						+ arg[5]
+						+ "','"
+						+ times[i]
+						+ "','"
+						+ arg[7]
+								+ "','"
+								+ totle
+								+ "','"
+								+ process_price
+								+ "','"
+								+ price
+								+ "','"
+								+ toap_price
+								+ "',now(),'"
+								+ arg[4]+" "+times[i].split("-")[0]+":00"
+								+ "','"
+								+ arg[4]+" "+times[i].split("-")[1]+":00"
+						+ "')";
+				log.send(DataType.basicType, "01182", "sql", sql);
+				succ = sqlUtil.sql_exec(sql);
+			}
+			
+			String jsonadd = "{\"success\":\"" + succ + "\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}else{
+			//余额不足
+			String jsonadd = "{\"success\":\"-1\"}";
+			inOutUtil.return_ajax(jsonadd);
+		}
+		
+	}
+	
+
+	private void appointadd(String[] arg) throws SQLException, IOException,
+			ServletException {
+		// TODO Auto-generated method stub
+		String sql = "insert into appoint_set (user_id,appointday,appoint_type,appointtime_set) values ('"
+				+ arg[2]
+				+ "','"
+				+ arg[3]
+				+ "','"
+				+ arg[4]
+				+ "','"
+				+ arg[5]
+				+ "')";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		int total = sqlUtil.sql_exec(sql);
+		String jsonadd = "{\"success\":\"" + total + "\"}";
+		inOutUtil.return_ajax(jsonadd);
+	}
+	
+	private void search_user_appointinfo(String[] arg) throws SQLException, IOException,
+	ServletException {
+		// TODO Auto-generated method stub   apstatus  10 拒絕預約
+		String sql = "select * from appoint_list where touser_id="+arg[3]+" and appointday='"+arg[4]+"' and apstatus!=10   ";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		list = sqlUtil.get_list(sql);
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	
+	
+	
+
+	// 快撩 arg[2]pages
+	private void search_my_appointinfo(String[] arg) throws SQLException,
+			IOException, ServletException, ParseException {
+		// TODO Auto-generated method stub
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String date1 = sdf.format(new Date());
+
+		Date dt = sdf.parse(date1);
+		Calendar rightNow = Calendar.getInstance();
+		rightNow.setTime(dt);
+		rightNow.add(Calendar.DAY_OF_MONTH, 1);
+		Date dt1 = rightNow.getTime();
+		String date2 = sdf.format(dt1);
+
+		dt = sdf.parse(date2);
+		rightNow.setTime(dt);
+		rightNow.add(Calendar.DAY_OF_MONTH, 1);
+		dt1 = rightNow.getTime();
+		String date3 = sdf.format(dt1);
+
+		dt = sdf.parse(date3);
+		rightNow.setTime(dt);
+		rightNow.add(Calendar.DAY_OF_MONTH, 1);
+		dt1 = rightNow.getTime();
+		String date4 = sdf.format(dt1);
+
+		dt = sdf.parse(date4);
+		SimpleDateFormat dateFm = new SimpleDateFormat("EEEE",Locale.CHINA);
+		String currSun = dateFm.format(dt);
+
+		String sql = "select * from appoint_set where user_id=" + arg[3]
+				+ " and appointday='" + date1 + "'";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		list1 = sqlUtil.get_list(sql);
+		if (list1.size() == 0) {
+			Map<String, Object> rowData = new HashMap<String, Object>();
+			rowData.put("appointweek", "今天");
+			rowData.put("user_id", arg[3]);
+			rowData.put("appointday", date1);
+			rowData.put("appoint_type", 0);
+			rowData.put("appointtime_set", "");
+			list.add(rowData);
+		} else {
+			list1.get(0).put("appointweek", "今天");
+			list.add(list1.get(0));
+		}
+
+		sql = "select * from appoint_set where user_id=" + arg[3]
+				+ " and appointday='" + date2 + "'";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		list1 = sqlUtil.get_list(sql);
+		if (list1.size() == 0) {
+			Map<String, Object> rowData = new HashMap<String, Object>();
+			rowData.put("appointweek", "明天");
+			rowData.put("user_id", arg[3]);
+			rowData.put("appointday", date2);
+			rowData.put("appoint_type", 0);
+			rowData.put("appointtime_set", "");
+			list.add(rowData);
+		} else {
+			list1.get(0).put("appointweek", "明天");
+			list.add(list1.get(0));
+		}
+		sql = "select * from appoint_set where user_id=" + arg[3]
+				+ " and appointday='" + date3 + "'";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		list1 = sqlUtil.get_list(sql);
+		if (list1.size() == 0) {
+			Map<String, Object> rowData = new HashMap<String, Object>();
+			rowData.put("appointweek", "后天");
+			rowData.put("user_id", arg[3]);
+			rowData.put("appointday", date3);
+			rowData.put("appoint_type", 0);
+			rowData.put("appointtime_set", "");
+			list.add(rowData);
+		} else {
+			list1.get(0).put("appointweek", "后天");
+			list.add(list1.get(0));
+		}
+
+		sql = "select * from appoint_set where user_id=" + arg[3]
+				+ " and appointday='" + date4 + "'";
+		log.send(DataType.basicType, "01182", "sql", sql);
+		list1 = sqlUtil.get_list(sql);
+		if (list1.size() == 0) {
+			Map<String, Object> rowData = new HashMap<String, Object>();
+			rowData.put("appointweek", currSun);
+			rowData.put("user_id", arg[3]);
+			rowData.put("appointday", date4);
+			rowData.put("appoint_type", 0);
+			rowData.put("appointtime_set", "");
+			list.add(rowData);
+		} else {
+			list1.get(0).put("appointweek", currSun);
+			list.add(list1.get(0));
+		}
+		log.send(DataType.basicType, "01182", "sql", JsonUtil.listToJson(list));
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+
+}

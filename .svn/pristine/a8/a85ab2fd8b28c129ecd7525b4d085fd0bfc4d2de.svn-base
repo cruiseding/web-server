@@ -1,0 +1,168 @@
+package com.net.aipeng.redirect.resolverD.interface1;
+
+
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.ServletException;
+
+import com.net.aipeng.classroot.interface1.mA.aipengInOutFace;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutManager;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface4.JyHelpManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+import com.net.aipeng.redirect.resolverD.interface2.PaySqlUser;
+import com.net.aipeng.redirect.resolverD.interface4.pay.Ordercreate;
+import com.net.aipeng.redirect.resolverD.interface4.zhufubao.Ordercreat;
+
+//import com.net.feimiaoquan.classroot.interface1.mA.aipengInOutFace;
+//import com.net.feimiaoquan.classroot.interface1.mA.aipengInOutManager;
+//import com.net.feimiaoquan.classroot.interface2.mA.aipengSqlMFace;
+//import com.net.feimiaoquan.classroot.interface4.JyHelpManager;
+//import com.net.feimiaoquan.classroot.interface4.JyLogDetect.DataType;
+//import com.net.feimiaoquan.redirect.resolverC.interface2.mA.PaySqlUser;
+//import com.net.feimiaoquan.redirect.resolverC.interface4.pay.Ordercreate;
+//import com.net.feimiaoquan.redirect.resolverC.interface4.zhufubao.Ordercreat;
+
+
+public class PayInOutUser extends aipengInOutManager implements aipengInOutFace {
+	protected ArrayList<Map<String, Object>> list;
+	protected ArrayList<Map<String, Object>> list1;
+	protected String json = "";
+	int totle;
+	int[] current;
+	aipengSqlMFace sqlmface = new PaySqlUser();
+	JyHelpManager helpmanager=new JyHelpManager();
+	HttpSession session = request.getSession();
+	public int[] getCurrent() {
+		return current;
+	}
+
+	public void setCurrent(int[] current) {
+		this.current = current;
+	}
+	public PayInOutUser(String[] arg, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException,
+			SQLException {
+		super(arg, request, response);
+	}
+	@Override
+	public void addface() throws SQLException, ServletException, IOException {
+
+		switch (arg[1]) {
+		case "zfbpay":
+			zfbpay(arg);
+			break;
+		case "wxpay":
+			wxpay(arg);
+			break;
+		}
+	}
+	/**
+	 * arg[0] A-user-add
+	 * arg[1] zfbpay
+	 * arg[2] user_id
+	 * arg[3] 充值内容 充了什么东西
+	 * arg[4] 充值金额
+	 * arg[5] 支付方式
+	 * arg[6] 生成的订单号
+	 * @param arg
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	
+	private void zfbpay(String[] arg) throws SQLException,IOException,ServletException{
+		
+		arg[0]=helpmanager.order_create();
+		String sql=sqlmface.addSqlface(0, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		sqlUtil.sql_exec(sql);
+		sql=sqlmface.addSqlface(1, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		list=sqlUtil.get_list(sql);
+		
+		
+//app_id=2015052600090779&biz_content={"timeout_express":"30m","seller_id":"","product_code":"QUICK_MSECURITY_PAY","total_amount":"0.01","subject":"1","body":"我是测试数据","out_trade_no":"IQJZSRC1YMQB5HU"}&charset=utf-8&format=json&method=alipay.trade.app.pay&notify_url=http://domain.merchant.com/payment_notify&sign_type=RSA2&timestamp=2016-08-25 20:26:31&version=1.0
+		String biz_content="{\"timeout_express\":\"30m\",\"product_code\":\"QUICK_MSECURITY_PAY\",\"total_amount\":\""+list.get(0).get("re_money").toString()+"\",\"subject\":\"飞秒圈充值\",\"body\":\"飞秒圈\",\"out_trade_no\":\"" + list.get(0).get("order_num").toString() +  "\"}";
+		
+		String orderInfo=Ordercreat.order_creat(biz_content);
+		inOutUtil.return_ajax("{\"orderInfo\":\""+orderInfo+"\"}");
+		
+//		sql=sqlmface.addSqlface(2, arg);
+//		list1=sqlUtil.get_list(sql);
+//		log.send(DataType.basicType, "01162", "pay", sql);
+//		log.send(DataType.basicType, "01162", "pay", list);
+//		log.send(DataType.basicType, "01162", "pay", list1);
+//		int b= Integer.parseInt(String.valueOf(list.get(0).get("baby_coin")));
+//		int a=Integer.parseInt(String.valueOf(list1.get(0).get("play_coin")));
+//	    int c=a+b;
+//	    String d=String.valueOf(c);
+//        arg[0]=d;
+//	    sql=sqlmface.addSqlface(3, arg);
+//	    sqlUtil.sql_exec(sql);
+//		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+	}
+	
+	/**
+	 * arg[0] A-user-add
+	 * arg[1] wxpay
+	 * arg[2] user_id
+	 * arg[3] 充值内容 充了什么东西
+	 * arg[4] 充值金额
+	 * arg[5] 支付方式
+	 * arg[6] 生成的订单号
+	 * @param arg
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void wxpay(String[] arg) throws SQLException,IOException,ServletException{
+		arg[1]="zfbpay";
+		arg[0]=helpmanager.order_create();
+		String sql=sqlmface.addSqlface(0, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		sqlUtil.sql_exec(sql);
+		sql=sqlmface.addSqlface(1, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		list=sqlUtil.get_list(sql);
+		//调用微信
+		String json=Ordercreate.order_creat(list.get(0).get("re_money").toString(),arg[0],request,response);
+		inOutUtil.return_ajax(json);
+   
+	}
+	
+	@Override
+	public void deleteface() throws SQLException, ServletException, IOException {
+
+		switch (arg[1]) {
+
+		}
+	}
+
+	@Override
+	public void modface() throws SQLException, ServletException, IOException {
+
+		switch (arg[1]) {
+		
+		}
+	}
+	
+
+	@Override
+	public void searchface() throws SQLException, ServletException, IOException {
+
+		switch (arg[1]) {
+		
+		
+		}
+	}
+	
+	
+}

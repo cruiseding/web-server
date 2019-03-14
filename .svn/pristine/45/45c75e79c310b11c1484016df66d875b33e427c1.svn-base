@@ -1,0 +1,250 @@
+package com.net.aipeng.redirect.resolverD.interface1;
+//package com.hz.vliao1.mA;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Map;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.aliyuncs.DefaultAcsClient;
+import com.aliyuncs.IAcsClient;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsRequest;
+import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
+import com.aliyuncs.exceptions.ClientException;
+import com.aliyuncs.exceptions.ServerException;
+import com.aliyuncs.profile.DefaultProfile;
+import com.aliyuncs.profile.IClientProfile;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutFace;
+import com.net.aipeng.classroot.interface1.mA.aipengInOutManager;
+import com.net.aipeng.classroot.interface2.mA.aipengSqlMFace;
+import com.net.aipeng.classroot.interface4.JsonUtil;
+import com.net.aipeng.classroot.interface4.JyHelpManager;
+import com.net.aipeng.classroot.interface4.JyLogDetect.DataType;
+import com.net.aipeng.redirect.resolverD.interface2.PaySqlUser;
+import com.net.aipeng.redirect.resolverD.interface4.pay.WXOrdercreate;
+import com.net.aipeng.redirect.resolverD.interface4.zhufubao.Ordercreat;
+
+/////////////
+public  class PayInoutUser extends aipengInOutManager implements
+aipengInOutFace {
+	protected ArrayList<Map<String, Object>> list;
+	protected ArrayList<Map<String, Object>> list1;
+	protected String json = "";
+	aipengSqlMFace sqlmface = new PaySqlUser();
+	protected JyHelpManager jy = new JyHelpManager();
+	public PayInoutUser(String[] arg, HttpServletRequest request,
+			HttpServletResponse response) throws IOException, ServletException,
+			SQLException {
+		super(arg, request, response);
+	}
+	
+	@Override
+	public void addface() throws SQLException, ServletException, IOException {
+		switch (arg[1]) {
+		case "zfbpay":
+			zfbpay(arg);
+			break;
+		case "wxpay":
+			wxpay(arg);
+			break;
+	
+		}
+		
+	}
+	/**
+	 * arg[0] A-user-add
+	 * arg[1] zfbpay
+	 * arg[2] user_id
+	 * arg[3] 充值内容 充了什么东西
+	 * arg[4] 充值金额
+	 * arg[5] 支付方式
+	 * arg[6] 生成的订单号
+	 * @param arg
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void zfbpay(String[] arg) throws SQLException,IOException,ServletException{
+		arg[0]=jy.order_create();
+		String sql="";
+		String type="";
+		if(!arg[3].startsWith("充值")){
+			if(Integer.parseInt(arg[3])<100){
+				String sqlnum="select * from vip_price_table where id="+arg[3];
+				log.send(DataType.basicType, "01162", "pay", sql);
+				list=sqlUtil.get_list(sqlnum);
+				arg[4]=list.get(0).get("money").toString();
+				type=list.get(0).get("name").toString();
+			}else{
+				String sqlnum="select * from supvip_table where id="+arg[3];
+				list=sqlUtil.get_list(sqlnum);
+				arg[4]=list.get(0).get("money").toString();
+				type=list.get(0).get("name").toString();
+			}
+		}else{
+			sql="select bean_num from love_bean_table where bean_price="+arg[4];
+			arg[6]=sqlUtil.get_string(sql);
+			type=arg[3];
+		}
+		
+		
+		sql=sqlmface.addSqlface(0, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		sqlUtil.sql_exec(sql);
+		sql=sqlmface.addSqlface(1, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		list=sqlUtil.get_list(sql);
+		
+		String biz_content="{\"timeout_express\":\"30m\",\"product_code\":\"QUICK_MSECURITY_PAY\",\"total_amount\":\""+list.get(0).get("pay_price").toString()+"\",\"subject\":\""+type+"\",\"body\":\""+type+"\",\"out_trade_no\":\"" + list.get(0).get("order_num").toString() +  "\"}";
+		log.send(DataType.basicType, "01162", "biz_content:", biz_content);
+		String orderInfo=Ordercreat.order_creat(biz_content);
+		inOutUtil.return_ajax("{\"orderInfo\":\""+orderInfo+"\"}");
+		
+		
+	}
+	
+	/**
+	 * arg[0] A-user-add
+	 * arg[1] wxpay
+	 * arg[2] user_id
+	 * arg[3] 充值内容 充了什么东西
+	 * arg[4] 充值金额
+	 * arg[5] 支付方式
+	 * arg[6] 生成的订单号
+	 * @param arg
+	 * @throws SQLException
+	 * @throws IOException
+	 * @throws ServletException
+	 */
+	private void wxpay(String[] arg) throws SQLException,IOException,ServletException{
+		arg[1]="zfbpay";
+		arg[0]=jy.order_create();
+		String sql="";
+		String type="";
+		if(!arg[3].startsWith("充值")){
+			if(Integer.parseInt(arg[3])<100){
+				String sqlnum="select * from vip_price_table where id="+arg[3];
+				log.send(DataType.basicType, "01162", "pay", sql);
+				list=sqlUtil.get_list(sqlnum);
+				arg[4]=list.get(0).get("money").toString();
+				type=list.get(0).get("name").toString();
+			}else{
+				String sqlnum="select * from supvip_table where id="+arg[3];
+				list=sqlUtil.get_list(sqlnum);
+				arg[4]=list.get(0).get("money").toString();
+				type=list.get(0).get("name").toString();
+			}
+		}else{
+			sql="select bean_num from love_bean_table where bean_price="+arg[4];
+			arg[6]=sqlUtil.get_string(sql);
+			type=arg[3];
+		}
+		sql=sqlmface.addSqlface(0, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		sqlUtil.sql_exec(sql);
+		sql=sqlmface.addSqlface(1, arg);
+		log.send(DataType.basicType, "01162", "pay", sql);
+		list=sqlUtil.get_list(sql);
+		String json=WXOrdercreate.order_creat(list.get(0).get("pay_price").toString(),arg[0],type,request,response);
+		inOutUtil.return_ajax(json);
+	}
+	@Override
+	public void modface() throws SQLException, ServletException, IOException {
+		// TODO Auto-generated method stub
+		switch (arg[1]) {
+		
+			
+		}
+	}
+	@Override
+	public void deleteface() throws SQLException, ServletException, IOException {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void searchface() throws SQLException, ServletException, IOException {
+		// TODO Auto-generated method stub
+		switch (arg[1]) {
+		case "get_code":
+		    get_code(arg);
+		    break;
+		case "payprice":
+			payprice(arg);
+			break;
+		}
+	}
+	private void payprice(String[] arg) throws SQLException, IOException,
+	ServletException {
+		String sql = sqlmface.searchSqlface(0, arg);
+		log.send(DataType.basicType, "01178", "--充值的价格--", sql);
+		list = sqlUtil.get_list(sql);
+		log.send(DataType.basicType, "01178", "--充值的价格111--", list);
+		
+		inOutUtil.return_ajax(JsonUtil.listToJson(list));
+		
+	}
+	
+	private void get_code(String[] arg) throws SQLException, IOException, ServletException {
+		int num = (int) (Math.random() * 10000);
+		String jsonadd = "{\"random\":\"" + num + "\"}";
+		// 产品名称:云通信短信API产品,开发者无需替换
+		String product = "Dysmsapi";
+		// 产品域名,开发者无需替换
+		String domain = "dysmsapi.aliyuncs.com";
+
+		// TODO 此处需要替换成开发者自己的AK(在阿里云访问控制台寻�?
+		String accessKeyId = "LTAIsAWLMFFOzh0c";
+		String accessKeySecret = "6NFamLqIGjSobFpqEM7HcZXafg4CT0";
+
+		// 可自助调整超时时�?
+		System.setProperty("sun.net.client.defaultConnectTimeout", "60000");
+		System.setProperty("sun.net.client.defaultReadTimeout", "60000");
+
+		// 初始化acsClient,暂不支持region�?
+		IClientProfile profile = DefaultProfile.getProfile("cn-hangzhou",
+				accessKeyId, accessKeySecret);
+		SendSmsResponse sendSmsResponse = null;
+		try {
+			DefaultProfile.addEndpoint("cn-hangzhou", "cn-hangzhou", product,
+					domain);
+			IAcsClient acsClient = new DefaultAcsClient(profile);
+			// 组装请求对象-具体描述见控制台-文档部分内容
+			SendSmsRequest request = new SendSmsRequest();
+			// 必填:待发送手机号
+			request.setPhoneNumbers(arg[3]);
+			// 必填:短信签名-可在短信控制台中找到
+			request.setSignName("左右");
+			// 必填:短信模板-可在短信控制台中找到
+			request.setTemplateCode("SMS_135970001");
+			// 可�?模板中的变量替换JSON�?如模板内容为"亲爱�?{name},您的验证码为${code}"�?此处的值为
+			request.setTemplateParam("{\"code\":\"" + num + "\"}");
+			// 选填-上行短信扩展�?无特殊需求用户请忽略此字�?
+			// request.setSmsUpExtendCode("90997");
+
+			// 可�?outId为提供给业务方扩展字�?最终在短信回执消息中将此值带回给调用�?
+			// request.setOutId("yourOutId");
+
+			// hint 此处可能会抛出异常，注意catch
+
+			sendSmsResponse = acsClient.getAcsResponse(request);
+		} catch (ServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		log.send(DataType.basicType, "01162", "手机验证码是否发送成功 ", sendSmsResponse.getCode());
+		if (sendSmsResponse.getCode()!= null
+				&& sendSmsResponse.getCode().equals("OK")) {
+			// 请求成功
+			inOutUtil.return_ajax(jsonadd);
+		}		
+	}
+}
